@@ -344,7 +344,7 @@
             if (!query) return null;
             const isUrl = query.includes('.') && !query.includes(' ');
             if (!isUrl) {
-                return 'https://duckduckgo.com/?q=${encodeURIComponent(query)}';
+                return `https://duckduckgo.com/?q=${encodeURIComponent(query)}`;
             }
             if (!query.startsWith('http://') && !query.startsWith('https://')) {
                 return 'https://' + query;
@@ -373,7 +373,7 @@
             }
 
             const connection = new BareMuxConnection('https://favicon-service-2s6k.onrender.com/baremux/worker.js');
-            const wispUrl = "${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/wisp/";
+            const wispUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/wisp/`;
             const currentTransport = await connection.getTransport();
             if (currentTransport !== 'https://favicon-service-2s6k.onrender.com/libcurl/index.mjs') {
                 await connection.setTransport('https://favicon-service-2s6k.onrender.com/libcurl/index.mjs', [{ websocket: wispUrl }]);
@@ -522,7 +522,6 @@
                 }
                 try {
                     const urlObj = new URL(url);
-                    urlObj = urlObj.hostname.replace('https://', '');
                     return urlObj.hostname.replace('www.', '');
                 } catch (e) {
                     return 'Saved Site';
