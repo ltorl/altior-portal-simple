@@ -2,34 +2,59 @@ importScripts("https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js")
 
 const REQUIRED_STORES = ["config", "cookies", "publicSuffixList", "redirectTrackers", "referrerPolicies"];
 
-async function healScramjetDB() {
-    if (!indexedDB.databases) return;
-    let dbs;
-    try { dbs = await indexedDB.databases(); } catch (e) { return; }
-    for (const { name } of dbs) {
-        if (name !== "$scramjet") continue;
-        const corrupt = await new Promise((resolve) => {
-            const req = indexedDB.open(name);
-            req.onsuccess = () => {
-                const stores = Array.from(req.result.objectStoreNames);
-                req.result.close();
-                resolve(REQUIRED_STORES.some((s) => !stores.includes(s)));
-            };
-            req.onerror = () => resolve(false);
-        });
-        if (!corrupt) return;
-        await new Promise((resolve) => {
-            const del = indexedDB.deleteDatabase(name);
-            del.onsuccess = del.onerror = del.onblocked = () => resolve();
-        });
-        console.warn("sw: removed corrupt $scramjet config DB to self-heal");
+function probeStores(name) {
+    return new Promise((resolve) => {
+        const req = indexedDB.open(name);
+        req.onupgradeneeded = (e) => { e.target.transaction.abort(); resolve(null); };
+        req.onsuccess = () => {
+            const stores = Array.from(req.result.objectStoreNames);
+            req.result.close();
+            resolve(stores);
+        };
+        req.onerror = () => resolve(null);
+    });
+}
+
+function deleteDB(name) {
+    return new Promise((resolve) => {
+        const del = indexedDB.deleteDatabase(name);
+        del.onsuccess = del.onerror = del.onblocked = () => resolve();
+    });
+}
+
+function createDB(name) {
+    return new Promise((resolve, reject) => {
+        const req = indexedDB.open(name, 1);
+        req.onupgradeneeded = () => {
+            const db = req.result;
+            for (const store of REQUIRED_STORES) {
+                if (!db.objectStoreNames.contains(store)) db.createObjectStore(store);
+            }
+        };
+        req.onsuccess = () => { req.result.close(); resolve(); };
+        req.onerror = () => reject(req.error);
+    });
+}
+
+async function ensureScramjetDB() {
+    let exists = false;
+    if (indexedDB.databases) {
+        let dbs = [];
+        try { dbs = await indexedDB.databases(); } catch (e) { dbs = []; }
+        exists = dbs.some((d) => d.name === "$scramjet");
     }
+    if (exists) {
+        const stores = await probeStores("$scramjet");
+        if (stores && REQUIRED_STORES.every((s) => stores.includes(s))) return;
+        await deleteDB("$scramjet");
+    }
+    await createDB("$scramjet");
 }
 
 self.addEventListener("install", () => self.skipWaiting());
 
 self.addEventListener("activate", (event) =>
-    event.waitUntil(healScramjetDB().then(() => self.clients.claim()))
+    event.waitUntil(ensureScramjetDB().then(() => self.clients.claim()))
 );
 
 const { ScramjetServiceWorker } = $scramjetLoadWorker();
@@ -46,7 +71,7 @@ async function handleRequest(event) {
     } catch (e) {
         if (e && e.name === "NotFoundError" && !reactiveHealAttempted) {
             reactiveHealAttempted = true;
-            await healScramjetDB();
+            await ensureScramjetDB();
         }
     }
     return fetch(event.request);
