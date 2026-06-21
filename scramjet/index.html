@@ -25,11 +25,6 @@
 
         const HOST = 'https://favicon-service-2s6k.onrender.com';
 
-        // The service worker fetches proxied content through bare-mux, which can
-        // only reach a transport hosted by an in-scope window client. The portal
-        // runs in about:blank popups, which are NOT in-scope clients, so the SW
-        // can't get the transport from them. This real, same-origin opener page
-        // registers the SW and sets up the transport so the SW can pull it here.
         async function setupProxy() {
             if (!('serviceWorker' in navigator)) return;
             await navigator.serviceWorker.register('./sw.js');
@@ -46,8 +41,7 @@
         const proxyReady = setupProxy().catch(err => console.error('Proxy setup failed:', err));
 
         document.getElementById('open-portal-btn').addEventListener('click', async () => {
-            // Open the cloak popup synchronously so the click's user activation
-            // isn't lost to the awaits below (otherwise it gets popup-blocked).
+
             const popupWin = window.open('about:blank', '_blank');
             if (!popupWin) {
                 alert('Popup blocked! Please allow popups for this site.');
