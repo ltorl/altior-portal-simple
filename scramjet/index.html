@@ -25,12 +25,21 @@
 
         const HOST = 'https://favicon-service-2s6k.onrender.com';
 
+        // BareMux constructs a SharedWorker from this path, and a worker script MUST be
+        // same-origin with the page. worker.js lives on Render (cross-origin) so we wrap it
+        // in an inline same-origin worker via a blob URL that importScripts() the real one.
+        // Created ONCE so every BareMuxConnection in this document shares the same worker.
+        const BAREMUX_WORKER = URL.createObjectURL(new Blob(
+            [`importScripts("${HOST}/baremux/worker.js");`],
+            { type: 'application/javascript' }
+        ));
+
         async function setupProxy() {
             if (!('serviceWorker' in navigator)) return;
             await navigator.serviceWorker.register('./sw.js');
             await navigator.serviceWorker.ready;
 
-            const conn = new BareMuxConnection(`${HOST}/baremux/worker.js`);
+            const conn = new BareMuxConnection(BAREMUX_WORKER);
             const transport = `${HOST}/libcurl/index.mjs`;
             const wispUrl = 'wss://favicon-service-2s6k.onrender.com/wisp/';
             if (await conn.getTransport() !== transport) {

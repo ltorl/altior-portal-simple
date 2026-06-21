@@ -295,6 +295,14 @@
         import { BareMuxConnection } from '@mercuryworkshop/bare-mux';
         import 'https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js';
 
+        // A SharedWorker script must be same-origin with the page; worker.js is cross-origin
+        // on Render, so wrap it in an inline same-origin worker via a blob URL. Created once so
+        // every BareMuxConnection below shares the same worker (and one wisp connection).
+        const BAREMUX_WORKER = URL.createObjectURL(new Blob(
+            ['importScripts("https://favicon-service-2s6k.onrender.com/baremux/worker.js");'],
+            { type: 'application/javascript' }
+        ));
+
         const input = document.getElementById('url-input');
         const button = document.getElementById('go-btn');
         const errorDiv = document.getElementById('error-message');
@@ -401,7 +409,7 @@
                 return;
             }
 
-            const connection = new BareMuxConnection('https://favicon-service-2s6k.onrender.com/baremux/worker.js');
+            const connection = new BareMuxConnection(BAREMUX_WORKER);
             const wispUrl = 'wss://favicon-service-2s6k.onrender.com/wisp/';
             const currentTransport = await connection.getTransport();
             if (currentTransport !== 'https://favicon-service-2s6k.onrender.com/libcurl/index.mjs') {
@@ -456,7 +464,11 @@
                         });
                         await scramjet.init();
                         await new Promise(r => setTimeout(r, 50));
-                        const connection = new BareMuxConnection('https://favicon-service-2s6k.onrender.com/baremux/worker.js');
+                        const baremuxWorker = URL.createObjectURL(new Blob(
+                            ['importScripts("https://favicon-service-2s6k.onrender.com/baremux/worker.js");'],
+                            { type: 'application/javascript' }
+                        ));
+                        const connection = new BareMuxConnection(baremuxWorker);
                         const wispUrl = '${wispUrl}';
                         const currentTransport = await connection.getTransport();
                         if (currentTransport !== 'https://favicon-service-2s6k.onrender.com/libcurl/index.mjs') {
