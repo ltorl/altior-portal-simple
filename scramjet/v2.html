@@ -414,7 +414,10 @@
             }
 
             const connection = new BareMuxConnection('https://favicon-service-2s6k.onrender.com/baremux/worker.js');
-            const wispUrl = `${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/wisp/`;
+            // This page runs inside an about:blank popup, so location.host is empty.
+            // Build the wisp endpoint from the proxy origin (the same host that serves
+            // scramjet and handles the /wisp/ upgrade) instead of the popup's location.
+            const wispUrl = 'wss://favicon-service-2s6k.onrender.com/wisp/';
             const currentTransport = await connection.getTransport();
             if (currentTransport !== 'https://favicon-service-2s6k.onrender.com/libcurl/index.mjs') {
                 await connection.setTransport('https://favicon-service-2s6k.onrender.com/libcurl/index.mjs', [{ websocket: wispUrl }]);
