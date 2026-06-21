@@ -13,9 +13,7 @@ async function handleRequest(event) {
             return scramjet.fetch(event);
         }
     } catch (e) {
-        // Scramjet config DB not initialized yet (e.g. in the opener, which never inits a
-        // controller). Don't let it reject the request — fall through to the network so
-        // non-proxied fetches (like loading v2.html) still work.
+        
     }
     return fetch(event.request);
 }
