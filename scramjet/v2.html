@@ -295,9 +295,6 @@
         import { BareMuxConnection } from '@mercuryworkshop/bare-mux';
         import 'https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js';
 
-        // A SharedWorker script must be same-origin with the page; worker.js is cross-origin
-        // on Render, so wrap it in an inline same-origin worker via a blob URL. Created once so
-        // every BareMuxConnection below shares the same worker (and one wisp connection).
         const BAREMUX_WORKER = URL.createObjectURL(new Blob(
             ['importScripts("https://favicon-service-2s6k.onrender.com/baremux/worker.js");'],
             { type: 'application/javascript' }
