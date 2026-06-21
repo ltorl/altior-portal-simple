@@ -30,8 +30,32 @@
             { type: 'application/javascript' }
         ));
 
+        const SCRAMJET_STORES = ['config', 'cookies', 'publicSuffixList', 'redirectTrackers', 'referrerPolicies'];
+
+        function ensureScramjetDB() {
+            return new Promise((resolve) => {
+                const req = indexedDB.open('$scramjet', 1);
+                req.onupgradeneeded = () => {
+                    const db = req.result;
+                    for (const store of SCRAMJET_STORES) {
+                        if (!db.objectStoreNames.contains(store)) db.createObjectStore(store);
+                    }
+                };
+                req.onsuccess = () => {
+                    const db = req.result;
+                    const missing = SCRAMJET_STORES.some((s) => !db.objectStoreNames.contains(s));
+                    db.close();
+                    if (!missing) return resolve();
+                    const del = indexedDB.deleteDatabase('$scramjet');
+                    del.onsuccess = del.onerror = del.onblocked = () => ensureScramjetDB().then(resolve);
+                };
+                req.onerror = () => resolve();
+            });
+        }
+
         async function setupProxy() {
             if (!('serviceWorker' in navigator)) return;
+            await ensureScramjetDB();
             await navigator.serviceWorker.register('./sw.js');
             await navigator.serviceWorker.ready;
 
