@@ -1,4 +1,4 @@
-importScripts("https://altior-portal.onrender.com/scram/scramjet.all.js");
+importScripts("https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js");
 
 const { ScramjetServiceWorker } = $scramjetLoadWorker();
 const scramjet = new ScramjetServiceWorker();

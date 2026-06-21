@@ -286,14 +286,14 @@
     <script type="importmap">
         {
             "imports": {
-                "@mercuryworkshop/bare-mux": "https://altior-portal.onrender.com/baremux/index.mjs"
+                "@mercuryworkshop/bare-mux": "https://favicon-service-2s6k.onrender.com/baremux/index.mjs"
             }
         }
     </script>
 
     <script type="module">
         import { BareMuxConnection } from '@mercuryworkshop/bare-mux';
-        import 'https://altior-portal.onrender.com/scram/scramjet.all.js';
+        import 'https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js';
 
         const input = document.getElementById('url-input');
         const button = document.getElementById('go-btn');
@@ -307,9 +307,9 @@
                 const { ScramjetController } = $scramjetLoadController();
                 scramjet = new ScramjetController({
                     files: {
-                        wasm: 'https://altior-portal.onrender.com/scram/scramjet.wasm.wasm',
-                        all: 'https://altior-portal.onrender.com/scram/scramjet.all.js',
-                        sync: 'https://altior-portal.onrender.com/scram/scramjet.sync.js',
+                        wasm: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.wasm.wasm',
+                        all: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js',
+                        sync: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.sync.js',
                     }
                 });
                 await scramjet.init();
@@ -372,11 +372,11 @@
                 return;
             }
 
-            const connection = new BareMuxConnection('https://altior-portal.onrender.com/baremux/worker.js');
+            const connection = new BareMuxConnection('https://favicon-service-2s6k.onrender.com/baremux/worker.js');
             const wispUrl = "${location.protocol === 'https:' ? 'wss:' : 'ws:'}//${location.host}/wisp/";
             const currentTransport = await connection.getTransport();
-            if (currentTransport !== 'https://altior-portal.onrender.com/libcurl/index.mjs') {
-                await connection.setTransport('https://altior-portal.onrender.com/libcurl/index.mjs', [{ websocket: wispUrl }]);
+            if (currentTransport !== 'https://favicon-service-2s6k.onrender.com/libcurl/index.mjs') {
+                await connection.setTransport('https://favicon-service-2s6k.onrender.com/libcurl/index.mjs', [{ websocket: wispUrl }]);
                 console.log('Transport set to libcurl with wisp:', wispUrl);
             }
 
@@ -408,7 +408,7 @@
             <script type="importmap">
                 {
                     "imports": {
-                        "@mercuryworkshop/bare-mux": "https://altior-portal.onrender.com/baremux/index.mjs"
+                        "@mercuryworkshop/bare-mux": "https://favicon-service-2s6k.onrender.com/baremux/index.mjs"
                     }
                 }
             <\/script>
@@ -416,22 +416,22 @@
                 import { BareMuxConnection } from '@mercuryworkshop/bare-mux';
                 window.addEventListener('load', async () => {
                     try {
-                        await import('https://altior-portal.onrender.com/scram/scramjet.all.js');
+                        await import('https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js');
                         const { ScramjetController } = $scramjetLoadController();
                         const scramjet = new ScramjetController({
                             files: {
-                                wasm: 'https://altior-portal.onrender.com/scram/scramjet.wasm.wasm',
-                                all: 'https://altior-portal.onrender.com/scram/scramjet.all.js',
-                                sync: 'https://altior-portal.onrender.com/scram/scramjet.sync.js',
+                                wasm: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.wasm.wasm',
+                                all: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js',
+                                sync: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.sync.js',
                             }
                         });
                         await scramjet.init();
                         await new Promise(r => setTimeout(r, 50));
-                        const connection = new BareMuxConnection('https://altior-portal.onrender.com/baremux/worker.js');
+                        const connection = new BareMuxConnection('https://favicon-service-2s6k.onrender.com/baremux/worker.js');
                         const wispUrl = '${wispUrl}';
                         const currentTransport = await connection.getTransport();
-                        if (currentTransport !== 'https://altior-portal.onrender.com/libcurl/index.mjs') {
-                            await connection.setTransport('https://altior-portal.onrender.com/libcurl/index.mjs', [{ websocket: wispUrl }]);
+                        if (currentTransport !== 'https://favicon-service-2s6k.onrender.com/libcurl/index.mjs') {
+                            await connection.setTransport('https://favicon-service-2s6k.onrender.com/libcurl/index.mjs', [{ websocket: wispUrl }]);
                         }
                         const frameObj = scramjet.createFrame();
                         const frame = frameObj.frame;
