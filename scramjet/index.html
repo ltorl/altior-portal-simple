@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="referrer" content="no-referrer">
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; }
+    </style>
+</head>
+<body>
+
+    <button id="open-portal-btn" style='width: 100%; height: 100%'>Open Portal</button>
+
+    <script>
+        document.getElementById('open-portal-btn').addEventListener('click', async () => {
+            if ('serviceWorker' in navigator) {
+                try {
+                    await navigator.serviceWorker.register(`./sw.js`);
+                    await navigator.serviceWorker.ready;
+                } catch (err) {
+                    console.error('Service Worker registration failed:', err);
+                }
+            }
+
+            const popupWin = window.open('about:blank', '_blank');
+
+            if (!popupWin) {
+                alert('Popup blocked! Please allow popups for this site.');
+                return;
+            }
+
+            const content = await fetch('/v2.html').then(r => r.text());
+            popupWin.document.open();
+            popupWin.document.write(content);
+            popupWin.document.close();
+        });
+    </script>
+
+</body>
+</html>
