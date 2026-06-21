@@ -380,7 +380,7 @@
                 console.log('Transport set to libcurl with wisp:', wispUrl);
             }
 
-            const popupWin = window.open('about:blank', '_blank');
+            const popupWin = window.open('about:blank', '_blank', 'noreferrer');
             if (!popupWin) {
                 errorDiv.textContent = 'Popup blocked! Please allow popups for this site.';
                 errorDiv.style.display = 'block';
