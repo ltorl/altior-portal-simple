@@ -12,15 +12,6 @@
 
     <script>
         document.getElementById('open-portal-btn').addEventListener('click', async () => {
-            // Open the popup synchronously, while the click's user activation is still
-            // valid. Opening it after an `await` gets blocked even on a real button click.
-            const popupWin = window.open('about:blank', '_blank');
-
-            if (!popupWin) {
-                alert('Popup blocked! Please allow popups for this site.');
-                return;
-            }
-
             if ('serviceWorker' in navigator) {
                 try {
                     await navigator.serviceWorker.register(`./sw.js`);
@@ -28,6 +19,13 @@
                 } catch (err) {
                     console.error('Service Worker registration failed:', err);
                 }
+            }
+
+            const popupWin = window.open('about:blank', '_blank');
+
+            if (!popupWin) {
+                alert('Popup blocked! Please allow popups for this site.');
+                return;
             }
 
             const content = await fetch('https://raw.githubusercontent.com/ltorl/altior-portal-simple/refs/heads/main/scramjet/v2.html').then(r => r.text());
