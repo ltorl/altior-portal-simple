@@ -302,8 +302,39 @@
         let scramjet = null;
         let isScramjetReady = false;
 
+        // A Scramjet IndexedDB left over from a different engine version can be
+        // missing the object stores this version expects, which makes init() throw
+        // "One of the specified object stores was not found." Detect and drop any
+        // such stale DB before initializing so the engine recreates it cleanly.
+        async function clearStaleScramjetDB() {
+            const required = ['config', 'cookies', 'publicSuffixList', 'redirectTrackers', 'referrerPolicies'];
+            if (!indexedDB.databases) return;
+            let dbs = [];
+            try { dbs = await indexedDB.databases(); } catch (e) { return; }
+            for (const { name } of dbs) {
+                if (!name) continue;
+                const stale = await new Promise(resolve => {
+                    const req = indexedDB.open(name);
+                    req.onsuccess = () => {
+                        const stores = Array.from(req.result.objectStoreNames);
+                        req.result.close();
+                        resolve(required.some(s => !stores.includes(s)));
+                    };
+                    req.onerror = () => resolve(false);
+                });
+                if (stale) {
+                    await new Promise(resolve => {
+                        const del = indexedDB.deleteDatabase(name);
+                        del.onsuccess = del.onerror = del.onblocked = () => resolve();
+                    });
+                    console.warn('Removed stale Scramjet database:', name);
+                }
+            }
+        }
+
         async function initScramjet() {
             try {
+                await clearStaleScramjetDB();
                 const { ScramjetController } = $scramjetLoadController();
                 scramjet = new ScramjetController({
                     files: {
