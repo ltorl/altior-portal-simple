@@ -14,7 +14,7 @@
         document.getElementById('open-portal-btn').addEventListener('click', async () => {
             // Open the popup synchronously, while the click's user activation is still
             // valid. Opening it after an `await` gets blocked even on a real button click.
-            const popupWin = window.open('about:blank', '_blank', 'noreferrer');
+            const popupWin = window.open('about:blank', '_blank');
 
             if (!popupWin) {
                 alert('Popup blocked! Please allow popups for this site.');
