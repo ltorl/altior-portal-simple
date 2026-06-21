@@ -338,6 +338,7 @@
                 await clearStaleScramjetDB();
                 const { ScramjetController } = $scramjetLoadController();
                 scramjet = new ScramjetController({
+                    prefix: '/altior-portal-simple/scramjet/p/',
                     files: {
                         wasm: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.wasm.wasm',
                         all: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js',
@@ -453,6 +454,7 @@
                         await import('https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js');
                         const { ScramjetController } = $scramjetLoadController();
                         const scramjet = new ScramjetController({
+                            prefix: '/altior-portal-simple/scramjet/p/',
                             files: {
                                 wasm: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.wasm.wasm',
                                 all: 'https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js',
