@@ -1,7 +1,5 @@
 importScripts("https://favicon-service-2s6k.onrender.com/scram/scramjet.all.js");
 
-// Activate immediately and take control of existing clients (the opener page)
-// so the service worker can reach the bare-mux transport hosted there.
 self.addEventListener("install", () => self.skipWaiting());
 self.addEventListener("activate", (event) => event.waitUntil(self.clients.claim()));
 
