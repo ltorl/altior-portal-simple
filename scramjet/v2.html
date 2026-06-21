@@ -302,10 +302,6 @@
         let scramjet = null;
         let isScramjetReady = false;
 
-        // A Scramjet IndexedDB left over from a different engine version can be
-        // missing the object stores this version expects, which makes init() throw
-        // "One of the specified object stores was not found." Detect and drop any
-        // such stale DB before initializing so the engine recreates it cleanly.
         async function clearStaleScramjetDB() {
             const required = ['config', 'cookies', 'publicSuffixList', 'redirectTrackers', 'referrerPolicies'];
             if (!indexedDB.databases) return;
@@ -355,13 +351,6 @@
 
         async function waitForServiceWorker() {
             if (!('serviceWorker' in navigator)) return;
-            // This page is written into an about:blank popup, which inherits the
-            // opener's origin and its already-registered service worker. Calling
-            // register() here throws "The document is in an invalid state" because
-            // about:blank has no URL to scope a worker to. The opener (index.html)
-            // registers and activates the SW before writing this page, so just use
-            // the inherited registration; the proxied iframe gets a real same-origin
-            // URL and is controlled by it regardless of this popup's own state.
             if (navigator.serviceWorker.controller) return;
             try {
                 const registration = await navigator.serviceWorker.register('/sw.js');
@@ -375,7 +364,6 @@
                 });
                 console.log('Service Worker active');
             } catch (err) {
-                // Expected inside an about:blank popup — fall back to the opener's SW.
                 console.warn('Using inherited service worker (popup cannot register):', err.message);
             }
         }
@@ -414,9 +402,6 @@
             }
 
             const connection = new BareMuxConnection('https://favicon-service-2s6k.onrender.com/baremux/worker.js');
-            // This page runs inside an about:blank popup, so location.host is empty.
-            // Build the wisp endpoint from the proxy origin (the same host that serves
-            // scramjet and handles the /wisp/ upgrade) instead of the popup's location.
             const wispUrl = 'wss://favicon-service-2s6k.onrender.com/wisp/';
             const currentTransport = await connection.getTransport();
             if (currentTransport !== 'https://favicon-service-2s6k.onrender.com/libcurl/index.mjs') {
