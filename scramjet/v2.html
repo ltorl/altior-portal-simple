@@ -355,19 +355,29 @@
 
         async function waitForServiceWorker() {
             if (!('serviceWorker' in navigator)) return;
-            const registration = await navigator.serviceWorker.register('/sw.js');
-            if (registration.active) return;
-            if (registration.waiting) {
-                registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+            // This page is written into an about:blank popup, which inherits the
+            // opener's origin and its already-registered service worker. Calling
+            // register() here throws "The document is in an invalid state" because
+            // about:blank has no URL to scope a worker to. The opener (index.html)
+            // registers and activates the SW before writing this page, so just use
+            // the inherited registration; the proxied iframe gets a real same-origin
+            // URL and is controlled by it regardless of this popup's own state.
+            if (navigator.serviceWorker.controller) return;
+            try {
+                const registration = await navigator.serviceWorker.register('/sw.js');
+                if (registration.active) return;
+                if (registration.waiting) {
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                }
+                await new Promise(resolve => {
+                    const check = () => registration.active ? resolve() : setTimeout(check, 100);
+                    check();
+                });
+                console.log('Service Worker active');
+            } catch (err) {
+                // Expected inside an about:blank popup — fall back to the opener's SW.
+                console.warn('Using inherited service worker (popup cannot register):', err.message);
             }
-            await new Promise(resolve => {
-                const check = () => {
-                    if (registration.active) resolve();
-                    else setTimeout(check, 100);
-                };
-                check();
-            });
-            console.log('Service Worker active');
         }
 
         function normalizeUrl(query) {
