@@ -10,23 +10,49 @@
 
     <button id="open-portal-btn" style='width: 100%; height: 100%'>Open Portal</button>
 
-    <script>
-        document.getElementById('open-portal-btn').addEventListener('click', async () => {
-            const popupWin = window.open('about:blank', '_blank');
+    <script type="importmap">
+        {
+            "imports": {
+                "@mercuryworkshop/bare-mux": "https://favicon-service-2s6k.onrender.com/baremux/index.mjs"
+            }
+        }
+    </script>
 
+    <script type="module">
+        import { BareMuxConnection } from '@mercuryworkshop/bare-mux';
+
+        const HOST = 'https://favicon-service-2s6k.onrender.com';
+
+        // The service worker fetches proxied content through bare-mux, which can
+        // only reach a transport hosted by an in-scope window client. The portal
+        // runs in about:blank popups, which are NOT in-scope clients, so the SW
+        // can't get the transport from them. This real, same-origin opener page
+        // registers the SW and sets up the transport so the SW can pull it here.
+        async function setupProxy() {
+            if (!('serviceWorker' in navigator)) return;
+            await navigator.serviceWorker.register('./sw.js');
+            await navigator.serviceWorker.ready;
+
+            const conn = new BareMuxConnection(`${HOST}/baremux/worker.js`);
+            const transport = `${HOST}/libcurl/index.mjs`;
+            const wispUrl = 'wss://favicon-service-2s6k.onrender.com/wisp/';
+            if (await conn.getTransport() !== transport) {
+                await conn.setTransport(transport, [{ websocket: wispUrl }]);
+            }
+        }
+
+        const proxyReady = setupProxy().catch(err => console.error('Proxy setup failed:', err));
+
+        document.getElementById('open-portal-btn').addEventListener('click', async () => {
+            // Open the cloak popup synchronously so the click's user activation
+            // isn't lost to the awaits below (otherwise it gets popup-blocked).
+            const popupWin = window.open('about:blank', '_blank');
             if (!popupWin) {
                 alert('Popup blocked! Please allow popups for this site.');
                 return;
             }
 
-            if ('serviceWorker' in navigator) {
-                try {
-                    await navigator.serviceWorker.register(`./sw.js`);
-                    await navigator.serviceWorker.ready;
-                } catch (err) {
-                    console.error('Service Worker registration failed:', err);
-                }
-            }
+            await proxyReady;
 
             const content = await fetch('https://raw.githubusercontent.com/ltorl/altior-portal-simple/refs/heads/main/scramjet/v2.html').then(r => r.text());
             popupWin.document.open();
